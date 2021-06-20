@@ -21,6 +21,19 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
     // temporary in memory cache for holding employee data
     private final Map<Integer, Employee> cache = new HashMap<>();
 
+    /**
+     *
+     */
+    public EmployeeRepositoryImpl() {
+
+        // cache seed employee data
+        final Employee emp = new Employee();
+        emp.setId(1);
+        emp.setFirstName("Mike");
+        emp.setLastName("buddy");
+        cache.put(1, emp);
+    }
+
     /*
      * (non-Javadoc)
      *
