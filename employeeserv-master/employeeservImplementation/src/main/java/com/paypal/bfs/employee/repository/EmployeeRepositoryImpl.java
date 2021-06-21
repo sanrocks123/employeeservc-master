@@ -1,8 +1,14 @@
 package com.paypal.bfs.employee.repository;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import org.dizitart.no2.Nitrite;
+import org.dizitart.no2.NitriteId;
+import org.dizitart.no2.WriteResult;
+import org.dizitart.no2.objects.ObjectRepository;
+import org.dizitart.no2.objects.filters.ObjectFilters;
+import org.dizitart.no2.util.Iterables;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.paypal.bfs.test.employeeserv.api.model.Employee;
@@ -18,21 +24,10 @@ import com.paypal.bfs.test.employeeserv.api.model.Employee;
 @Repository
 public class EmployeeRepositoryImpl implements EmployeeRepository {
 
-    // temporary in memory cache for holding employee data
-    private final Map<Integer, Employee> cache = new HashMap<>();
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
-    /**
-     *
-     */
-    public EmployeeRepositoryImpl() {
-
-        // cache seed employee data
-        final Employee emp = new Employee();
-        emp.setId(1);
-        emp.setFirstName("Mike");
-        emp.setLastName("buddy");
-        cache.put(1, emp);
-    }
+    @Autowired
+    private Nitrite db;
 
     /*
      * (non-Javadoc)
@@ -43,8 +38,14 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
      */
     @Override
     public Employee createEmployee(Employee employee) {
-        cache.put(employee.getId(), employee);
-        return employee;
+
+        final ObjectRepository<Employee> repository = db.getRepository(Employee.class);
+        final WriteResult wr = repository.insert(employee);
+
+        final NitriteId nitriteId = Iterables.firstOrDefault(wr);
+        log.info("createEmployee, nitriteId: {}", nitriteId);
+
+        return repository.getById(nitriteId);
     }
 
     /*
@@ -56,7 +57,8 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
      */
     @Override
     public Employee getEmployeeById(String id) {
-        return cache.get(Integer.valueOf(id));
+        final ObjectRepository<Employee> repository = db.getRepository(Employee.class);
+        return repository.find(ObjectFilters.eq("id", Integer.valueOf(id))).firstOrDefault();
     }
 
 }

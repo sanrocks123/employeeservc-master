@@ -1,5 +1,6 @@
 package com.paypal.bfs.employee.main;
 
+import org.dizitart.no2.Nitrite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -41,4 +42,14 @@ public class EmployeeservApplication {
                 .paths(PathSelectors.any()).build();
         return docket;
     }
+
+    /**
+     *
+     * @return
+     */
+    @Bean
+    public Nitrite initDB() {
+        return Nitrite.builder().compressed().openOrCreate("user", "password");
+    }
+
 }
